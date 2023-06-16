@@ -90,7 +90,7 @@ const ProductChart = () => {
         },
         title: {
           display: true,
-          text: "Test 2",
+          text: "Count of Products by Category",
         },
         maintainAspectRatio: false,
         responsive: true,
