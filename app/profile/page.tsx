@@ -35,7 +35,9 @@ const Page = () => {
               height={150}
               className="rounded-full"
             />
-            <h1 className="text-4xl text-center">{user?.name}'s Profile</h1>
+            <h1 className="text-4xl text-center">
+              {user?.name}&apos;s Profile
+            </h1>
             <p>{user?.email}</p>
           </div>
         </div>
