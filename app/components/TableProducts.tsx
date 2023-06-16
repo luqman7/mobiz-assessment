@@ -80,10 +80,11 @@ const TableProducts = () => {
           placeholder="Search by title or description"
           className="w-full lg:w-3/4 border-b border-gray-200 outline-none p-2"
         />
-        <div className="flex items-center">
+        <div className="w-full lg:w-1/4 flex items-center">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
+            className="w-1/2"
           >
             <option value="">All Categories</option>
             {Array.from(
@@ -97,6 +98,7 @@ const TableProducts = () => {
           <select
             value={selectedBrand}
             onChange={(e) => setSelectedBrand(e.target.value)}
+            className="w-1/2"
           >
             <option value="">All Brands</option>
             {Array.from(new Set(products.map((product) => product.brand))).map(
