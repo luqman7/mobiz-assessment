@@ -40,7 +40,7 @@ const AverageRating = (): JSX.Element => {
   }, [data]);
 
   return (
-    <div className="w-full bg-blue-200 rounded-lg h-32 flex justify-between items-center px-5">
+    <div className="w-full bg-blue-200 rounded-lg h-32 flex flex-col lg:flex-row justify-center lg:justify-between items-center px-5">
       <p className="italic font-light">Average Rating of All Products</p>
       <div className="text-7xl font-semibold">{averageRating}</div>
     </div>

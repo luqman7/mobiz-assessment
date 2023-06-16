@@ -41,7 +41,7 @@ const ProductChart = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get("https://dummyjson.com/products");
-        const data = response.data.products; // Assuming the response data is an array of objects with a "category" property
+        const data = response.data.products;
         const countObj: { [key: string]: number } = {};
 
         // Count the items by category
@@ -92,22 +92,15 @@ const ProductChart = () => {
           display: true,
           text: "Count of Products by Category",
         },
-        maintainAspectRatio: false,
-        responsive: true,
       },
+      maintainAspectRatio: false,
     });
   }, [categories]);
 
   return (
-    <div className="pt-10">
-      {/* <h1>Product Chart</h1> */}
-      {/* {categories.map((category, index) => (
-        <div key={index}>
-          {category.category}: {category.count}
-        </div>
-      ))} */}
-      <div className="h-96 flex items-center justify-center">
-        <Bar className="h-full" data={chartData} options={chartOptions} />
+    <div className="pt-10 overflow-x-auto">
+      <div className="h-96 w-[5y00px] flex items-center justify-center">
+        <Bar data={chartData} options={chartOptions} />
       </div>
     </div>
   );

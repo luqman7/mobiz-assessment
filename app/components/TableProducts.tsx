@@ -36,7 +36,6 @@ const TableProducts = () => {
   }, []);
 
   useEffect(() => {
-    // Apply filters based on selected category and brand
     let filteredData = products || [];
     if (selectedCategory !== "") {
       filteredData = filteredData.filter(
@@ -56,7 +55,6 @@ const TableProducts = () => {
   };
 
   useEffect(() => {
-    // Apply search query filter
     let searchData = filteredProducts;
     if (searchQuery !== "") {
       searchData = searchData.filter(
@@ -73,14 +71,14 @@ const TableProducts = () => {
   }
 
   return (
-    <div className="pt-10">
+    <div className="pt-20">
       <div className="pb-5 flex flex-col lg:flex-row">
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearch}
           placeholder="Search by title or description"
-          className="w-3/4"
+          className="w-full lg:w-3/4 border-b border-gray-200 outline-none p-2"
         />
         <div className="flex items-center">
           <select
@@ -111,7 +109,7 @@ const TableProducts = () => {
           </select>
         </div>
       </div>
-      <div className="h-[calc(100vh-280px)] overflow-x-auto">
+      <div className="overflow-x-auto">
         <table className="w-full whitespace-nowrap text-sm table-auto lg:table-fixed overflow-x-auto">
           <thead>
             <tr className="border-b border-gray-300">
