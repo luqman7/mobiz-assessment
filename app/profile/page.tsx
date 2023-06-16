@@ -3,7 +3,7 @@ import { useSession, signIn } from "next-auth/react";
 import SideNav from "../components/SideNav";
 import Image from "next/image";
 
-const page = () => {
+const Page = () => {
   const session = useSession();
   const user = session.data?.user;
 
@@ -44,4 +44,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
