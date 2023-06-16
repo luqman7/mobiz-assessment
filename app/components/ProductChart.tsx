@@ -26,7 +26,15 @@ const ProductChart = () => {
   const [categories, setCategories] = useState<
     { category: string; count: number }[]
   >([]);
-  const [chartData, setChartData] = useState({ datasets: [] });
+  const [chartData, setChartData] = useState<{
+    labels: string[];
+    datasets: {
+      label: string;
+      data: number[];
+      borderColor: string;
+      backgroundColor: string;
+    }[];
+  }>({ labels: [], datasets: [] });
   const [chartOptions, setChartOptions] = useState({});
 
   useEffect(() => {
