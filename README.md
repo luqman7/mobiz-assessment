@@ -25,4 +25,4 @@ Method: GET
 
 ## Deployment
 
-[Link Text](https://mobiz-assessment.vercel.app)
+[https://mobiz-assessment.vercel.app](https://mobiz-assessment.vercel.app)
