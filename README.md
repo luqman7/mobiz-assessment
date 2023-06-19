@@ -17,10 +17,12 @@ Usage: To authenticate users and manage sessions.
 
 ## APIs
 
-## Products API
-
 Base URL: `https://dummyjson.com/products`
 
 Authentication: No authentication required.
 
 Method: GET
+
+## Deployment
+
+[Link Text](https://mobiz-assessment.vercel.app)
