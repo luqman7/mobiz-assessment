@@ -40,7 +40,9 @@ const ProductChart = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("https://dummyjson.com/products");
+        const response = await axios.get(
+          "https://dummyjson.com/products?limit=100"
+        );
         const data = response.data.products;
         const countObj: { [key: string]: number } = {};
 
@@ -99,7 +101,7 @@ const ProductChart = () => {
 
   return (
     <div className="pt-10 overflow-x-auto">
-      <div className="h-96 w-[5y00px] flex items-center justify-center">
+      <div className="h-96 flex items-center justify-center">
         <Bar data={chartData} options={chartOptions} />
       </div>
     </div>

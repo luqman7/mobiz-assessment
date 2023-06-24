@@ -1,5 +1,24 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 interface Product {
   title: string;
@@ -21,11 +40,25 @@ const TableProducts = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedBrand, setSelectedBrand] = useState<string>("");
+  const [skip, setSkip] = useState<number>(0);
+  const [limit, setLimit] = useState<number>(50);
+  const [chartData, setChartData] = useState<{
+    labels: string[];
+    datasets: {
+      label: string;
+      data: number[];
+      borderColor: string;
+      backgroundColor: string;
+    }[];
+  }>({ labels: [], datasets: [] });
+  const [chartOptions, setChartOptions] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("https://dummyjson.com/products");
+        const response = await axios.get(
+          `https://dummyjson.com/products?skip=${skip}&limit=${limit}`
+        );
         setProducts(response.data.products);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -33,10 +66,10 @@ const TableProducts = () => {
     };
 
     fetchData();
-  }, []);
+  }, [skip, limit]);
 
   useEffect(() => {
-    let filteredData = products || [];
+    let filteredData: Product[] = products || [];
     if (selectedCategory !== "") {
       filteredData = filteredData.filter(
         (product) => product.category === selectedCategory
@@ -48,6 +81,44 @@ const TableProducts = () => {
       );
     }
     setFilteredProducts(filteredData);
+
+    const categories: string[] = Array.from(
+      new Set(filteredData.map((product) => product.category))
+    );
+
+    console.log("Categories:", categories);
+
+    const productsByCategory: number[] = categories.map((category) => {
+      return filteredData.filter((product) => product.category === category)
+        .length;
+    });
+
+    console.log("Products by Category:", productsByCategory);
+
+    setChartData({
+      labels: categories,
+      datasets: [
+        {
+          label: "",
+          data: productsByCategory,
+          borderColor: "rgb(53,162,235)",
+          backgroundColor: "rgb(53, 162, 235, 0.4)",
+        },
+      ],
+    });
+
+    setChartOptions({
+      plugins: {
+        legend: {
+          position: "top",
+        },
+        title: {
+          display: true,
+          text: "Count of Searched Products by Category",
+        },
+      },
+      maintainAspectRatio: false,
+    });
   }, [products, selectedCategory, selectedBrand]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +126,7 @@ const TableProducts = () => {
   };
 
   useEffect(() => {
-    let searchData = filteredProducts;
+    let searchData = products || [];
     if (searchQuery !== "") {
       searchData = searchData.filter(
         (product) =>
@@ -63,8 +134,49 @@ const TableProducts = () => {
           product.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-    setFilteredProducts(searchData);
-  }, [searchQuery, filteredProducts]);
+
+    if (searchData !== filteredProducts) {
+      setFilteredProducts(searchData);
+    }
+
+    const uniqueCategoriesSet = new Set(
+      searchData.map((product) => product.category)
+    );
+    const uniqueCategories = Array.from(uniqueCategoriesSet);
+
+    const productsByCategory = uniqueCategories.map(
+      (category) =>
+        searchData.filter((product) => product.category === category).length
+    );
+
+    console.log(uniqueCategories);
+    console.log(productsByCategory);
+
+    setChartData({
+      labels: uniqueCategories,
+      datasets: [
+        {
+          label: "",
+          data: productsByCategory,
+          borderColor: "rgb(53,162,235)",
+          backgroundColor: "rgb(53, 162, 235, 0.4)",
+        },
+      ],
+    });
+
+    setChartOptions({
+      plugins: {
+        legend: {
+          position: "top",
+        },
+        title: {
+          display: true,
+          text: "Count of Searched Products by Category",
+        },
+      },
+      maintainAspectRatio: false,
+    });
+  }, [searchQuery, products]);
 
   if (!products) {
     return <div>Loading...</div>;
@@ -111,7 +223,7 @@ const TableProducts = () => {
           </select>
         </div>
       </div>
-      <div className="overflow-x-auto">
+      <div className=" h-[400px] overflow-auto">
         <table className="w-full whitespace-nowrap text-sm table-auto lg:table-fixed overflow-x-auto">
           <thead>
             <tr className="border-b border-gray-300">
@@ -143,6 +255,36 @@ const TableProducts = () => {
           </tbody>
         </table>
       </div>
+      <div className="flex justify-center mt-4">
+        <button
+          className={`px-4 py-2 border border-gray-400 rounded-md mr-2 ${
+            skip === 0 ? "cursor-not-allowed bg-gray-400 text-gray-500" : ""
+          }`}
+          onClick={() => setSkip(skip - limit)}
+        >
+          Previous
+        </button>
+        <button
+          className={`px-4 py-2 border border-gray-400 rounded-md mr-2 ${
+            skip + limit >= 100
+              ? "cursor-not-allowed bg-gray-400 text-gray-500"
+              : ""
+          }`}
+          onClick={() => setSkip(skip + limit)}
+          disabled={skip + limit >= 100}
+        >
+          Next
+        </button>
+      </div>
+      {(searchQuery !== "" ||
+        selectedCategory !== "" ||
+        selectedBrand !== "") && (
+        <div className=" pt-14 flex items-center justify-center">
+          <div className="h-96 lg:w-[700px]">
+            <Bar data={chartData} options={chartOptions} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

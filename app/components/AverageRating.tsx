@@ -20,7 +20,7 @@ const AverageRating = (): JSX.Element => {
     const fetchData = async (): Promise<void> => {
       try {
         const response = await axios.get<ApiResponse>(
-          "https://dummyjson.com/products"
+          "https://dummyjson.com/products?limit=100"
         );
         setData(response.data.products);
       } catch (error) {
