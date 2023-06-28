@@ -19,66 +19,52 @@ const AverageRating = (): JSX.Element => {
   const [categoryName, setCategoryName] = useState("All Products");
 
   useEffect(() => {
-    const fetchData = async (): Promise<void> => {
-      try {
-        const response = await axios.get<ApiResponse>(
-          "https://dummyjson.com/products?limit=100"
-        );
-        setData(response.data.products);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
     fetchData();
-
-    fetchDataAll();
-
-    const fetchCategory = async (): Promise<void> => {
-      try {
-        const response = await axios.get<string[]>(
-          "https://dummyjson.com/products/categories"
-        );
-        setCategory(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
     fetchCategory();
   }, []);
 
   useEffect(() => {
     if (data) {
-      const totalRating = data.reduce((acc, item) => acc + item.rating, 0);
-      const average = totalRating / data.length;
+      const totalRating = calculateTotalRating(data);
+      const average = calculateAverage(totalRating, data.length);
       setAverageRating(average.toFixed(2));
     }
 
     if (dataCategory) {
-      const totalRating = dataCategory.reduce(
-        (acc, item) => acc + item.rating,
-        0
-      );
-      const average = totalRating / dataCategory.length;
+      const totalRating = calculateTotalRating(dataCategory);
+      const average = calculateAverage(totalRating, dataCategory.length);
       setAverageRating(average.toFixed(2));
     }
   }, [data, dataCategory]);
 
-  const fetchDataAll = () => {
-    if (data) {
-      console.log("first");
-      const totalRating = data.reduce((acc, item) => acc + item.rating, 0);
-      const average = totalRating / data.length;
-      setAverageRating(average.toFixed(2));
-      setCategoryName("All Products");
+  const fetchData = async (): Promise<void> => {
+    try {
+      const response = await axios.get<ApiResponse>(
+        "https://dummyjson.com/products?limit=100"
+      );
+      setData(response.data.products);
+    } catch (error) {
+      console.error("Error fetching data:", error);
     }
   };
 
-  const handleCategoryClick = (categoryItem: string): void => {
-    setSelectedCategory(categoryItem);
-    setCategoryName(categoryItem);
-    fetchDataByCategory(categoryItem);
+  const fetchCategory = async (): Promise<void> => {
+    try {
+      const response = await axios.get<string[]>(
+        "https://dummyjson.com/products/categories"
+      );
+      setCategory(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const calculateTotalRating = (products: Product[]): number => {
+    return products.reduce((acc, item) => acc + item.rating, 0);
+  };
+
+  const calculateAverage = (totalRating: number, count: number): number => {
+    return totalRating / count;
   };
 
   const fetchDataByCategory = async (categoryItem: string): Promise<void> => {
@@ -89,6 +75,21 @@ const AverageRating = (): JSX.Element => {
       setDataCategory(response.data.products);
     } catch (error) {
       console.error("Error fetching data:", error);
+    }
+  };
+
+  const handleCategoryClick = (categoryItem: string): void => {
+    setSelectedCategory(categoryItem);
+    setCategoryName(categoryItem);
+    fetchDataByCategory(categoryItem);
+  };
+
+  const fetchDataAll = () => {
+    if (data) {
+      const totalRating = calculateTotalRating(data);
+      const average = calculateAverage(totalRating, data.length);
+      setAverageRating(average.toFixed(2));
+      setCategoryName("All Products");
     }
   };
 
