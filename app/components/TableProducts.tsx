@@ -38,145 +38,87 @@ const TableProducts = () => {
   const [products, setProducts] = useState<Product[] | null>(null);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [categoryList, setCategoryList] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedBrand, setSelectedBrand] = useState<string>("");
   const [skip, setSkip] = useState<number>(0);
   const [limit, setLimit] = useState<number>(50);
-  const [chartData, setChartData] = useState<{
-    labels: string[];
-    datasets: {
-      label: string;
-      data: number[];
-      borderColor: string;
-      backgroundColor: string;
-    }[];
-  }>({ labels: [], datasets: [] });
-  const [chartOptions, setChartOptions] = useState({});
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          `https://dummyjson.com/products?skip=${skip}&limit=${limit}`
-        );
-        setProducts(response.data.products);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
     fetchData();
+    fetchCategoryList();
   }, [skip, limit]);
 
   useEffect(() => {
-    let filteredData: Product[] = products || [];
+    // let filteredData: Product[] = products || [];
     if (selectedCategory !== "") {
-      filteredData = filteredData.filter(
-        (product) => product.category === selectedCategory
-      );
+      // filteredData = filteredData.filter(
+      //   (product) => product.category === selectedCategory
+      // );
+      fetchDataByCategory();
+    } else {
+      fetchData();
     }
-    if (selectedBrand !== "") {
-      filteredData = filteredData.filter(
-        (product) => product.brand === selectedBrand
-      );
-    }
-    setFilteredProducts(filteredData);
-
-    const categories: string[] = Array.from(
-      new Set(filteredData.map((product) => product.category))
-    );
-
-    console.log("Categories:", categories);
-
-    const productsByCategory: number[] = categories.map((category) => {
-      return filteredData.filter((product) => product.category === category)
-        .length;
-    });
-
-    console.log("Products by Category:", productsByCategory);
-
-    setChartData({
-      labels: categories,
-      datasets: [
-        {
-          label: "",
-          data: productsByCategory,
-          borderColor: "rgb(53,162,235)",
-          backgroundColor: "rgb(53, 162, 235, 0.4)",
-        },
-      ],
-    });
-
-    setChartOptions({
-      plugins: {
-        legend: {
-          position: "top",
-        },
-        title: {
-          display: true,
-          text: "Count of Searched Products by Category",
-        },
-      },
-      maintainAspectRatio: false,
-    });
-  }, [products, selectedCategory, selectedBrand]);
+    // if (selectedBrand !== "") {
+    //   filteredData = filteredData.filter(
+    //     (product) => product.brand === selectedBrand
+    //   );
+    // }
+    // setFilteredProducts(filteredData);
+  }, [selectedCategory, selectedBrand]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
   useEffect(() => {
-    let searchData = products || [];
     if (searchQuery !== "") {
-      searchData = searchData.filter(
-        (product) =>
-          product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      let newsearchData =
+        products &&
+        products.filter(
+          (product) =>
+            product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.description
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
+        );
+      // console.log("newsearchdata", newsearchData);
+      setFilteredProducts(newsearchData!);
     }
-
-    if (searchData !== filteredProducts) {
-      setFilteredProducts(searchData);
-    }
-
-    const uniqueCategoriesSet = new Set(
-      searchData.map((product) => product.category)
-    );
-    const uniqueCategories = Array.from(uniqueCategoriesSet);
-
-    const productsByCategory = uniqueCategories.map(
-      (category) =>
-        searchData.filter((product) => product.category === category).length
-    );
-
-    console.log(uniqueCategories);
-    console.log(productsByCategory);
-
-    setChartData({
-      labels: uniqueCategories,
-      datasets: [
-        {
-          label: "",
-          data: productsByCategory,
-          borderColor: "rgb(53,162,235)",
-          backgroundColor: "rgb(53, 162, 235, 0.4)",
-        },
-      ],
-    });
-
-    setChartOptions({
-      plugins: {
-        legend: {
-          position: "top",
-        },
-        title: {
-          display: true,
-          text: "Count of Searched Products by Category",
-        },
-      },
-      maintainAspectRatio: false,
-    });
   }, [searchQuery, products]);
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(
+        `https://dummyjson.com/products?skip=${skip}&limit=${limit}`
+      );
+      setProducts(response.data.products);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const fetchDataByCategory = async () => {
+    try {
+      const response = await axios.get(
+        `https://dummyjson.com/products/category/${selectedCategory}`
+      );
+      setProducts(response.data.products);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const fetchCategoryList = async () => {
+    try {
+      const response = await axios.get(
+        "https://dummyjson.com/products/categories"
+      );
+      setCategoryList(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   if (!products) {
     return <div>Loading...</div>;
@@ -196,18 +138,17 @@ const TableProducts = () => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-1/2"
+            className="w-full outline-none"
           >
             <option value="">All Categories</option>
-            {Array.from(
-              new Set(products.map((product) => product.category))
-            ).map((category, index) => (
-              <option key={index} value={category}>
-                {category}
-              </option>
-            ))}
+            {categoryList &&
+              categoryList.map((category, index) => (
+                <option key={index} value={category}>
+                  {category}
+                </option>
+              ))}
           </select>
-          <select
+          {/* <select
             value={selectedBrand}
             onChange={(e) => setSelectedBrand(e.target.value)}
             className="w-1/2"
@@ -220,7 +161,7 @@ const TableProducts = () => {
                 </option>
               )
             )}
-          </select>
+          </select> */}
         </div>
       </div>
       <div className=" h-[400px] overflow-auto">
@@ -237,54 +178,66 @@ const TableProducts = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map((product, index) => (
-              <tr key={index}>
-                <td>{product.title}</td>
-                <td className="whitespace-break-spaces">
-                  {product.description}
-                </td>
-                <td className="text-center">{product.price}</td>
-                <td className="text-center">{product.category}</td>
-                <td className="text-center">{product.brand}</td>
-                <td className="text-center">{product.stock}</td>
-                <td>
-                  <img src={product.thumbnail} alt="thumbnail_products" />
-                </td>
-              </tr>
-            ))}
+            {searchQuery === "" &&
+              products.map((product, index) => (
+                <tr key={index}>
+                  <td className="whitespace-break-spaces">{product.title}</td>
+                  <td className="whitespace-break-spaces">
+                    {product.description}
+                  </td>
+                  <td className="text-center">{product.price}</td>
+                  <td className="text-center">{product.category}</td>
+                  <td className="text-center">{product.brand}</td>
+                  <td className="text-center">{product.stock}</td>
+                  <td>
+                    <img src={product.thumbnail} alt="thumbnail_products" />
+                  </td>
+                </tr>
+              ))}
+            {searchQuery !== "" &&
+              filteredProducts.map((product, index) => (
+                <tr key={index}>
+                  <td className="whitespace-break-spaces">{product.title}</td>
+                  <td className="whitespace-break-spaces">
+                    {product.description}
+                  </td>
+                  <td className="text-center">{product.price}</td>
+                  <td className="text-center">{product.category}</td>
+                  <td className="text-center">{product.brand}</td>
+                  <td className="text-center">{product.stock}</td>
+                  <td>
+                    <img src={product.thumbnail} alt="thumbnail_products" />
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
       <div className="flex justify-center mt-4">
-        <button
-          className={`px-4 py-2 border border-gray-400 rounded-md mr-2 ${
-            skip === 0 ? "cursor-not-allowed bg-gray-400 text-gray-500" : ""
-          }`}
-          onClick={() => setSkip(skip - limit)}
-        >
-          Previous
-        </button>
-        <button
-          className={`px-4 py-2 border border-gray-400 rounded-md mr-2 ${
-            skip + limit >= 100
-              ? "cursor-not-allowed bg-gray-400 text-gray-500"
-              : ""
-          }`}
-          onClick={() => setSkip(skip + limit)}
-          disabled={skip + limit >= 100}
-        >
-          Next
-        </button>
+        {selectedCategory === "" && (
+          <>
+            <button
+              className={`px-4 py-2 border border-gray-400 rounded-md mr-2 ${
+                skip === 0 ? "cursor-not-allowed bg-gray-400 text-gray-500" : ""
+              }`}
+              onClick={() => setSkip(skip - limit)}
+            >
+              Previous
+            </button>
+            <button
+              className={`px-4 py-2 border border-gray-400 rounded-md mr-2 ${
+                skip + limit >= 100
+                  ? "cursor-not-allowed bg-gray-400 text-gray-500"
+                  : ""
+              }`}
+              onClick={() => setSkip(skip + limit)}
+              disabled={skip + limit >= 100}
+            >
+              Next
+            </button>
+          </>
+        )}
       </div>
-      {(searchQuery !== "" ||
-        selectedCategory !== "" ||
-        selectedBrand !== "") && (
-        <div className=" pt-14 flex items-center justify-center">
-          <div className="h-96 lg:w-[700px]">
-            <Bar data={chartData} options={chartOptions} />
-          </div>
-        </div>
-      )}
     </div>
   );
 };
